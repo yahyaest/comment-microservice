@@ -8,4 +8,12 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000" ]
+RUN pip install prisma
+
+# RUN prisma migrate dev
+
+# RUN prisma generate
+
+CMD ["sh", "-c", "tail -f /dev/null"]
+
+# CMD [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--reload", "--port", "8000" ]
