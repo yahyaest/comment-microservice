@@ -38,7 +38,11 @@ model Thread {
  id        Int       @id @default(autoincrement())
  createdAt DateTime  @default(now())
  updatedAt DateTime  @updatedAt
+ createdBy String
+ name      String
  comments  Comment[]
+
+ @@unique([createdBy, name])
 }
 
 model Vote {
