@@ -83,3 +83,20 @@ async def update_vote(vote_id:int, body: dict):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=404, detail="Failed to patch vote")
+
+@router.delete("/votes/{vote_id}", tags=["vote"])
+async def update_vote(vote_id:int):
+    try:
+        vote = await prisma.vote.find_unique(where={'id': vote_id })
+
+        if not vote:
+            raise HTTPException(status_code=404, detail="Vote not found")
+        
+        vote = await prisma.vote.delete(
+            where= { 'id': vote_id }
+        )
+
+        return vote
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=404, detail="Failed to delete vote")

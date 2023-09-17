@@ -56,6 +56,9 @@ model Vote {
  commentId Int?
  reply     Reply?   @relation(fields: [replyId], references: [id])
  replyId   Int?
+
+  @@unique([userEmail, vote_type, commentId])
+  @@unique([userEmail, vote_type, replyId])
 }
 
 enum VoteType {
