@@ -6,10 +6,12 @@ from app.prisma import prisma
 router = APIRouter()
 
 class Comment(BaseModel):
-    userEmail: str
+    userEmail: Optional[str] = None
     userId: Optional[int] = None
-    content: str
+    username: str
+    userImage: Optional[str] = None
     threadId: int
+    content: str
 
 
 @router.get("/comments", tags=["comment"])
@@ -51,6 +53,8 @@ async def add_comment(body: Comment):
         comment = await prisma.comment.create(
             {
                 "userEmail": body.userEmail,
+                "username": body.username,
+                "userImage": body.userImage,
                 "userId": body.userId,
                 "content": body.content,
                 "threadId": body.threadId,

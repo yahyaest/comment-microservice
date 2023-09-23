@@ -1,67 +1,71 @@
 generator client {
- provider  = "prisma-client-py"
- // config_option = "value"
- interface = "asyncio"
+  provider  = "prisma-client-py"
+  // config_option = "value"
+  interface = "asyncio"
 }
 
 datasource db {
- provider = "postgresql"
- url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Comment {
- id        Int      @id @default(autoincrement())
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
- userEmail String
- userId    Int?
- content   String
- thread    Thread?  @relation(fields: [threadId], references: [id])
- threadId  Int?
- votes     Vote[]
- replies   Reply[]
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userEmail String?
+  username  String
+  userImage String?
+  userId    Int?
+  content   String
+  thread    Thread?  @relation(fields: [threadId], references: [id])
+  threadId  Int?
+  votes     Vote[]
+  replies   Reply[]
 }
 
 model Reply {
- id        Int      @id @default(autoincrement())
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
- userEmail String
- userId    Int?
- content   String
- comment   Comment? @relation(fields: [commentId], references: [id])
- commentId Int?
- votes     Vote[]
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userEmail String?
+  username  String
+  userImage String?
+  userId    Int?
+  content   String
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?
+  votes     Vote[]
 }
 
 model Thread {
- id        Int       @id @default(autoincrement())
- createdAt DateTime  @default(now())
- updatedAt DateTime  @updatedAt
- createdBy String
- name      String
- comments  Comment[]
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  createdBy String
+  name      String
+  comments  Comment[]
 
- @@unique([createdBy, name])
+  @@unique([createdBy, name])
 }
 
 model Vote {
- id        Int      @id @default(autoincrement())
- createdAt DateTime @default(now())
- updatedAt DateTime @updatedAt
- userEmail String
- userId    Int?
- vote_type VoteType
- comment   Comment? @relation(fields: [commentId], references: [id])
- commentId Int?
- reply     Reply?   @relation(fields: [replyId], references: [id])
- replyId   Int?
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userEmail String
+  userId    Int?
+  vote_type VoteType
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId Int?
+  reply     Reply?   @relation(fields: [replyId], references: [id])
+  replyId   Int?
 
   @@unique([userEmail, vote_type, commentId])
   @@unique([userEmail, vote_type, replyId])
 }
 
 enum VoteType {
- UP
- DOWN
+  UP
+  DOWN
 }

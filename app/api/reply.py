@@ -6,8 +6,10 @@ from app.prisma import prisma
 router = APIRouter()
 
 class Reply(BaseModel):
-    userEmail: str
+    userEmail: Optional[str] = None
     userId: Optional[int] = None
+    username: str
+    userImage: Optional[str] = None
     content: str
     commentId: int
 
@@ -51,6 +53,8 @@ async def add_reply(body: Reply):
         reply = await prisma.reply.create(
             {
                 "userEmail": body.userEmail,
+                "username": body.username,
+                "userImage": body.userImage,
                 "userId": body.userId,
                 "content": body.content,
                 "commentId": body.commentId,
