@@ -54,15 +54,16 @@ model Vote {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userEmail String
+  username  String?
   userId    Int?
-  vote_type VoteType
+  voteType  VoteType
   comment   Comment? @relation(fields: [commentId], references: [id])
   commentId Int?
   reply     Reply?   @relation(fields: [replyId], references: [id])
   replyId   Int?
 
-  @@unique([userEmail, vote_type, commentId])
-  @@unique([userEmail, vote_type, replyId])
+  @@unique([userEmail, voteType, commentId])
+  @@unique([userEmail, voteType, replyId])
 }
 
 enum VoteType {

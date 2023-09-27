@@ -7,7 +7,8 @@ router = APIRouter()
 
 class Vote(BaseModel):
     userEmail: str
-    vote_type: str
+    userName: Optional[str] = None
+    voteType: str
     userId: Optional[int] = None
     replyId: Optional[int] = None
     commentId: Optional[int] = None
@@ -55,7 +56,8 @@ async def add_vote(body: Vote):
         vote = await prisma.vote.create(
             {
                 "userEmail" : body.userEmail,
-                "vote_type": body.vote_type,
+                "username": body.username,
+                "voteType": body.vote_type,
                 "userId": body.userId,
                 "replyId": body.replyId,
                 "commentId": body.commentId,
