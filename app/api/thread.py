@@ -19,6 +19,9 @@ async def get_threads(request : Request):
         else:
             query_dict = dict(params)
 
+            if(params.get("id")):
+                query_dict["id"] = int(query_dict["id"])
+
             threads = await prisma.thread.find_many(
                 where=query_dict,
             )

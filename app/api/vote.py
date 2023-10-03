@@ -23,6 +23,9 @@ async def get_votes(request: Request):
         else:
             query_dict = dict(params)
 
+            if(params.get("id")):
+                query_dict["id"] = int(query_dict["id"])
+
             if(params.get("commentId")):
                 query_dict["commentId"] = int(query_dict["commentId"])
 
@@ -56,8 +59,8 @@ async def add_vote(body: Vote):
         vote = await prisma.vote.create(
             {
                 "userEmail" : body.userEmail,
-                "username": body.username,
-                "voteType": body.vote_type,
+                "username": body.userName,
+                "voteType": body.voteType,
                 "userId": body.userId,
                 "replyId": body.replyId,
                 "commentId": body.commentId,

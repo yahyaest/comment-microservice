@@ -23,6 +23,9 @@ async def get_comments(request: Request):
         else:
             query_dict = dict(params)
 
+            if(params.get("id")):
+                query_dict["id"] = int(query_dict["id"])
+
             if(params.get("threadId")):
                 query_dict["threadId"] = int(query_dict["threadId"])
 
