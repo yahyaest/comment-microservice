@@ -17,12 +17,17 @@ class Reply(BaseModel):
 @router.get("/replies", tags=["reply"])
 async def get_replies(request: Request):
     try:
+        user = request.user
         params = request.query_params
-        if not params:
-            replies = await prisma.reply.find_many()
-        else:
-            query_dict = dict(params)
+        query_dict = dict(params)
 
+        if user and user.get("role") != 'ADMIN':
+            query_dict["userEmail"] = user.get('email')
+
+        if not query_dict:
+            replies = await prisma.reply.find_many()
+
+        else:
             if(params.get("id")):
                 query_dict["id"] = int(query_dict["id"])
 
@@ -42,13 +47,21 @@ async def get_replies(request: Request):
         raise HTTPException(status_code=404, detail="Replies not found")
 
 @router.get("/replies/{reply_id}", tags=["reply"])
-async def get_reply(reply_id : int):
-    reply = await prisma.reply.find_unique(where={'id':reply_id })
+async def get_reply(reply_id : int, request: Request):
+    try:
+        user = request.user
+        reply = await prisma.reply.find_unique(where={'id':reply_id })
 
-    if not reply:
-        raise HTTPException(status_code=404, detail="reply not found")
-    
-    return reply
+        if not reply:
+            raise HTTPException(status_code=404, detail="Reply not found")
+        
+        if user.get('email') != reply.userEmail and user.get('role') != 'ADMIN':
+            raise HTTPException(status_code=403, detail="Reply belong to another user")      
+
+        return reply
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/replies", tags=["reply"])
 async def add_reply(body: Reply):
@@ -69,13 +82,18 @@ async def add_reply(body: Reply):
         raise HTTPException(status_code=404, detail="Failed to post replay")
 
 @router.patch("/replies/{reply_id}", tags=["reply"])
-async def update_reply(reply_id:int, body: dict):
+async def update_reply(reply_id:int, body: dict, request: Request):
     try:
+        user = request.user
         reply = await prisma.reply.find_unique(where={'id': reply_id })
+        print(type(reply))
 
         if not reply:
-            raise HTTPException(status_code=404, detail="reply not found")
+            raise HTTPException(status_code=404, detail="Reply not found")
         
+        if user.get('email') != reply.userEmail and user.get('role') != 'ADMIN':
+            raise HTTPException(status_code=403, detail="Reply belong to another user")    
+
         reply = await prisma.reply.update(
             where= { 'id': reply_id },
             data= dict(body)
@@ -83,5 +101,5 @@ async def update_reply(reply_id:int, body: dict):
 
         return reply
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=404, detail="Failed to patch replay")
+        print(e)    
+        raise HTTPException(status_code=404, detail=e.detail)

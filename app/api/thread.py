@@ -13,12 +13,16 @@ class Thread(BaseModel):
 @router.get("/threads", tags=["thread"])
 async def get_threads(request : Request):
     try:
+        user = request.user
         params = request.query_params
-        if not params:
+        query_dict = dict(params)
+
+        if user and user.get("role") != 'ADMIN':
+            query_dict["createdBy"] = user.get('email')
+
+        if not query_dict:
             threads = await prisma.thread.find_many()
         else:
-            query_dict = dict(params)
-
             if(params.get("id")):
                 query_dict["id"] = int(query_dict["id"])
 
@@ -32,13 +36,21 @@ async def get_threads(request : Request):
         raise HTTPException(status_code=404, detail="Threads not found")
 
 @router.get("/threads/{thread_id}", tags=["thread"])
-async def get_thread(thread_id : int):
-    thread = await prisma.thread.find_unique(where={'id':thread_id })
+async def get_thread(thread_id : int, request: Request):
+    try:
+        user = request.user
+        thread = await prisma.thread.find_unique(where={'id':thread_id })
 
-    if not thread:
-        raise HTTPException(status_code=404, detail="thread not found")
-    
-    return thread
+        if not thread:
+            raise HTTPException(status_code=404, detail="Thread not found")
+        
+        if user.get('email') != thread.createdBy and user.get('role') != 'ADMIN':
+            raise HTTPException(status_code=403, detail="Thread belong to another user")      
+
+        return thread
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/threads", tags=["thread"])
 async def add_thread(body: Thread):
@@ -56,13 +68,18 @@ async def add_thread(body: Thread):
 
 
 @router.patch("/threads/{thread_id}", tags=["thread"])
-async def update_thread(thread_id:int, body: dict):
+async def update_thread(thread_id:int, body: dict, request: Request):
     try:
+        user = request.user
         thread = await prisma.thread.find_unique(where={'id': thread_id })
+        print(type(thread))
 
         if not thread:
-            raise HTTPException(status_code=404, detail="thread not found")
+            raise HTTPException(status_code=404, detail="Thread not found")
         
+        if user.get('email') != thread.createdBy and user.get('role') != 'ADMIN':
+            raise HTTPException(status_code=403, detail="Thread belong to another user")    
+
         thread = await prisma.thread.update(
             where= { 'id': thread_id },
             data= dict(body)
@@ -70,5 +87,5 @@ async def update_thread(thread_id:int, body: dict):
 
         return thread
     except Exception as e:
-        print(e)
-        raise HTTPException(status_code=404, detail="Failed to post replay")
+        print(e)    
+        raise HTTPException(status_code=404, detail=e.detail)
