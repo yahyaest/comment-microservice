@@ -17,13 +17,13 @@ class BearerAuthBackend(AuthenticationBackend):
             raise HTTPException(status_code=401, detail="JWT_SECRET was not provided")
         
         if "Authorization" not in conn.headers:
-            return
+            raise AuthenticationError('Authorization token was not provided')
 
         auth = conn.headers["Authorization"]
         try:
             scheme, token = auth.split()
             if scheme.lower() != 'bearer':
-                return
+                raise AuthenticationError('Only Authorization Bearer Token is provided')
             decoded = jwt.decode(
                 token,
                 os.getenv("JWT_SECRET",None),
