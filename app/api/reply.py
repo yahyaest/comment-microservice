@@ -1,8 +1,10 @@
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from app.prisma import prisma
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class Reply(BaseModel):
@@ -43,7 +45,7 @@ async def get_replies(request: Request):
         return replies
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Replies not found")
 
 @router.get("/replies/{reply_id}", tags=["reply"])
@@ -60,7 +62,7 @@ async def get_reply(reply_id : int, request: Request):
 
         return reply
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/replies", tags=["reply"])
@@ -78,7 +80,7 @@ async def add_reply(body: Reply):
         )
         return reply
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Failed to post replay")
 
 @router.patch("/replies/{reply_id}", tags=["reply"])
@@ -86,7 +88,7 @@ async def update_reply(reply_id:int, body: dict, request: Request):
     try:
         user = request.user
         reply = await prisma.reply.find_unique(where={'id': reply_id })
-        print(type(reply))
+        logger.error(type(reply))
 
         if not reply:
             raise HTTPException(status_code=404, detail="Reply not found")
@@ -101,5 +103,5 @@ async def update_reply(reply_id:int, body: dict, request: Request):
 
         return reply
     except Exception as e:
-        print(e)    
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)

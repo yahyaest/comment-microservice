@@ -1,11 +1,12 @@
 from http.client import HTTPException
+import logging
 import os
 import jwt
 from jwt.exceptions import PyJWTError
 import requests
 from starlette.authentication import (AuthenticationBackend, AuthenticationError)
 
-
+logger = logging.getLogger(__name__)
 class BearerAuthBackend(AuthenticationBackend):
     async def authenticate(self, conn):
         GATEWAY_BASE_URL = os.getenv("GATEWAY_BASE_URL",None)

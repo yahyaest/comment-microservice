@@ -10,6 +10,10 @@ services:
     container_name: comment
     stdin_open: true
     volumes:
-       - .:/app
+      - .:/app
     env_file:
       - .env
+    environment:
+      - GATEWAY_BASE_URL=http://gateway:3000
+      - LOG_LEVEL=DEBUG
+    entrypoint: /app/entrypoint.sh

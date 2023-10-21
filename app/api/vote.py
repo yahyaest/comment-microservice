@@ -1,8 +1,10 @@
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from app.prisma import prisma
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class Vote(BaseModel):
@@ -45,7 +47,7 @@ async def get_votes(request: Request):
         return votes
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Votes not found")
 
 @router.get("/votes/{vote_id}", tags=["vote"])
@@ -62,7 +64,7 @@ async def get_vote(vote_id : int, request: Request):
 
         return vote
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/votes", tags=["vote"])
@@ -80,7 +82,7 @@ async def add_vote(body: Vote):
         )
         return vote
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Failed to post vote")
 
 @router.patch("/votes/{vote_id}", tags=["vote"])
@@ -88,7 +90,7 @@ async def update_vote(vote_id:int, body: dict, request: Request):
     try:
         user = request.user
         vote = await prisma.vote.find_unique(where={'id': vote_id })
-        print(type(vote))
+        logger.error(type(vote))
 
         if not vote:
             raise HTTPException(status_code=404, detail="Vote not found")
@@ -103,7 +105,7 @@ async def update_vote(vote_id:int, body: dict, request: Request):
 
         return vote
     except Exception as e:
-        print(e)    
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
 
 @router.delete("/votes/{vote_id}", tags=["vote"])
@@ -124,5 +126,5 @@ async def update_vote(vote_id:int, request: Request):
 
         return vote
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)

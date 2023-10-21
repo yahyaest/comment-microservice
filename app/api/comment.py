@@ -1,8 +1,10 @@
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from app.prisma import prisma
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class Comment(BaseModel):
@@ -25,7 +27,7 @@ async def get_comments(request: Request):
             query_dict["userEmail"] = user.get('email')
 
         if not query_dict:
-            replies = await prisma.comment.find_many()
+            comments = await prisma.comment.find_many()
         else:
             if(params.get("id")):
                 query_dict["id"] = int(query_dict["id"])
@@ -36,13 +38,13 @@ async def get_comments(request: Request):
             if(params.get("userId")):
                 query_dict["userId"] = int(query_dict["userId"])
 
-            replies = await prisma.comment.find_many(
+            comments = await prisma.comment.find_many(
                 where=query_dict,
             )
-        return replies
+        return comments
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Comments not found")
 
 @router.get("/comments/{comment_id}", tags=["comment"])
@@ -59,7 +61,7 @@ async def get_comment(comment_id : int, request: Request):
 
         return comment
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/comments", tags=["comment"])
@@ -77,7 +79,7 @@ async def add_comment(body: Comment):
         )
         return comment
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Failed to post comment")
 
 @router.patch("/comments/{comment_id}", tags=["comment"])
@@ -85,7 +87,7 @@ async def update_comment(comment_id:int, body: dict, request: Request):
     try:
         user = request.user
         comment = await prisma.comment.find_unique(where={'id': comment_id })
-        print(type(comment))
+        logger.error(type(comment))
 
         if not comment:
             raise HTTPException(status_code=404, detail="Comment not found")
@@ -100,5 +102,5 @@ async def update_comment(comment_id:int, body: dict, request: Request):
 
         return comment
     except Exception as e:
-        print(e)    
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)

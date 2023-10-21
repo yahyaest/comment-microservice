@@ -1,7 +1,10 @@
+import logging
 import os
 from fastapi import HTTPException, Request, Response
 import requests
 import jwt
+
+logger = logging.getLogger(__name__)
 
 # Middleware to intercept and validate JWT token
 async def auth_middleware(request: Request, call_next):
@@ -15,7 +18,7 @@ async def auth_middleware(request: Request, call_next):
             raise HTTPException(status_code=401, detail="JWT_SECRET was not provided")
                         
         token = request.headers.get("authorization").replace('Bearer ', '')
-        print("token is : ", token)
+        logger.info("token is : ", token)
         if not token:
             raise HTTPException(status_code=401, detail="JWT token not found")
 
@@ -40,5 +43,5 @@ async def auth_middleware(request: Request, call_next):
         response = await call_next(request)
         return response
     except Exception as error:
-        print(error)
+        logger.error(error)
         return Response(content=str(error), status_code=401, media_type="application/json")

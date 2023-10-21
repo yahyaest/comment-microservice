@@ -1,8 +1,10 @@
+import logging
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from app.prisma import prisma
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 class Thread(BaseModel):
@@ -32,7 +34,7 @@ async def get_threads(request : Request):
         return threads
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Threads not found")
 
 @router.get("/threads/{thread_id}", tags=["thread"])
@@ -49,7 +51,7 @@ async def get_thread(thread_id : int, request: Request):
 
         return thread
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
 
 @router.post("/threads", tags=["thread"])
@@ -63,7 +65,7 @@ async def add_thread(body: Thread):
         )
         return thread
     except Exception as e:
-        print(e)
+        logger.error(e)
         raise HTTPException(status_code=404, detail="Failed to post thread")
 
 
@@ -72,7 +74,7 @@ async def update_thread(thread_id:int, body: dict, request: Request):
     try:
         user = request.user
         thread = await prisma.thread.find_unique(where={'id': thread_id })
-        print(type(thread))
+        logger.error(type(thread))
 
         if not thread:
             raise HTTPException(status_code=404, detail="Thread not found")
@@ -87,5 +89,5 @@ async def update_thread(thread_id:int, body: dict, request: Request):
 
         return thread
     except Exception as e:
-        print(e)    
+        logger.error(e)
         raise HTTPException(status_code=404, detail=e.detail)
